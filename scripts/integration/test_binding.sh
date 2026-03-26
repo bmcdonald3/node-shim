@@ -15,7 +15,7 @@ sleep 2
 
 # 2. Start node-service on port 8080
 METADATA_SERVICE_URL=http://localhost:8081 BOOT_SERVICE_URL=http://localhost:8081 go run ../../cmd/server/*.go &
-sleep 3
+sleep 10
 
 # 3. Create a NodeSet
 curl -s -X POST http://localhost:8080/nodesets -H "Content-Type: application/json" -d '{"apiVersion":"v1","kind":"NodeSet","metadata":{"name":"test-nodes"},"spec":{"selector":{"role":"compute"}}}' > /dev/null

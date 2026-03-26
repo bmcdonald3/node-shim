@@ -25,10 +25,6 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/user/node-service/pkg/apiversion"
 	"github.com/openchami/fabrica/pkg/versioning"
-	"github.com/openchami/fabrica/pkg/events"
-	"github.com/openchami/fabrica/pkg/reconcile"
-
-	"github.com/user/node-service/internal/reconciler"
 
 	
 
@@ -204,34 +200,14 @@ func runServer(cmd *cobra.Command, args []string) error {
 
 	
 
-// Register resource prefixes for UID generation
-// This is required before any handlers can create resources
-if err := registerResourcePrefixes(); err != nil {
-return fmt.Errorf("failed to register resource prefixes: %w", err)
-}
+	// Register resource prefixes for UID generation
+	// This is required before any handlers can create resources
+	if err := registerResourcePrefixes(); err != nil {
+		return fmt.Errorf("failed to register resource prefixes: %w", err)
+	}
 
-// Initialize event bus and reconciliation controller
-eventBus := events.NewInMemoryEventBus(1000, 10)
-
-// Get storage backend from initialized file backend
-storageBackend := storage.Backend
-
-controller := reconcile.NewController(eventBus, storageBackend)
-
-// Register ProfileBinding reconciler
-pbReconciler := reconciler.NewProfileBindingReconciler()
-controller.RegisterReconciler(pbReconciler)
-
-// Start controller in background
-go func() {
-if err := controller.Start(context.Background()); err != nil {
-log.Fatalf("Controller failed to start: %v", err)
-}
-}()
-log.Println("Reconciliation controller started")
-
-// Setup router
-r := chi.NewRouter()
+	// Setup router
+	r := chi.NewRouter()
 
 	// Add middleware
 	r.Use(middleware.Logger)
