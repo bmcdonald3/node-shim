@@ -42,6 +42,35 @@ import (
 	"github.com/user/node-service/apis/example.fabrica.dev/v1"
 )
 
+// CampaignResponse represents the response for Campaign operations
+type CampaignResponse = v1.Campaign
+
+// CreateCampaignRequest represents a request to create a Campaign
+type CreateCampaignRequest struct {
+	Metadata    fabrica.Metadata  `json:"metadata" validate:"required"`
+	Spec        v1.CampaignSpec   `json:"spec" validate:"required"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+// AsSpec converts the request fields to a spec object
+func (r *CreateCampaignRequest) AsSpec() v1.CampaignSpec {
+	return r.Spec
+}
+
+// UpdateCampaignRequest represents a request to update a Campaign
+type UpdateCampaignRequest struct {
+	Metadata    fabrica.Metadata  `json:"metadata,omitempty"`
+	Spec        v1.CampaignSpec   `json:"spec,omitempty" validate:"omitempty"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+// AsSpec converts the request fields to a spec object
+func (r *UpdateCampaignRequest) AsSpec() v1.CampaignSpec {
+	return r.Spec
+}
+
 // NodeResponse represents the response for Node operations
 type NodeResponse = v1.Node
 

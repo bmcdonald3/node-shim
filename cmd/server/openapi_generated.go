@@ -104,11 +104,163 @@ func GenerateOpenAPISpec() *openapi3.T {
 	}
 
 	// Register all resource paths
+	registerCampaignPaths(spec)
 	registerNodePaths(spec)
 	registerNodeSetPaths(spec)
 	registerProfileBindingPaths(spec)
 
 	return spec
+}
+
+// registerCampaignPaths registers OpenAPI paths for Campaign resources
+func registerCampaignPaths(spec *openapi3.T) {
+	// Generate schemas from Go types - NO ANNOTATIONS NEEDED
+	resourceSchema, _ := openapi3gen.NewSchemaRefForValue(&v1.Campaign{}, spec.Components.Schemas)
+	spec.Components.Schemas["Campaign"] = resourceSchema
+
+	createReqSchema, _ := openapi3gen.NewSchemaRefForValue(&CreateCampaignRequest{}, spec.Components.Schemas)
+	spec.Components.Schemas["CreateCampaignRequest"] = createReqSchema
+
+	updateReqSchema, _ := openapi3gen.NewSchemaRefForValue(&UpdateCampaignRequest{}, spec.Components.Schemas)
+	spec.Components.Schemas["UpdateCampaignRequest"] = updateReqSchema
+
+	// Error response schema
+	if _, exists := spec.Components.Schemas["ErrorResponse"]; !exists {
+		errorSchema := openapi3.NewObjectSchema().
+			WithProperty("error", openapi3.NewStringSchema()).
+			WithRequired([]string{"error"})
+		spec.Components.Schemas["ErrorResponse"] = &openapi3.SchemaRef{Value: errorSchema}
+	}
+
+	// DELETE response schema
+	if _, exists := spec.Components.Schemas["DeleteResponse"]; !exists {
+		deleteSchema, _ := openapi3gen.NewSchemaRefForValue(&DeleteResponse{}, spec.Components.Schemas)
+		spec.Components.Schemas["DeleteResponse"] = deleteSchema
+	}
+
+	// List Campaigns operation
+	listOp := openapi3.NewOperation()
+	listOp.OperationID = "listCampaigns"
+	listOp.Summary = "List all Campaign resources"
+	listOp.Description = "Returns a list of all Campaign resources in the inventory"
+	listOp.Tags = []string{"Campaign"}
+	listOp.Responses = openapi3.NewResponses()
+	arraySchema := openapi3.NewArraySchema()
+	arraySchema.Items = &openapi3.SchemaRef{Ref: "#/components/schemas/Campaign"}
+	listOp.Responses.Set("200", &openapi3.ResponseRef{
+		Value: openapi3.NewResponse().
+			WithDescription("Successful response").
+			WithJSONSchemaRef(&openapi3.SchemaRef{Value: arraySchema}),
+	})
+	listOp.Responses.Set("500", errorResponse())
+
+	// Create Campaign operation
+	createOp := openapi3.NewOperation()
+	createOp.OperationID = "createCampaign"
+	createOp.Summary = "Create a new Campaign resource"
+	createOp.Description = "Creates a new Campaign resource with the provided specification"
+	createOp.Tags = []string{"Campaign"}
+	createOp.RequestBody = &openapi3.RequestBodyRef{
+		Value: openapi3.NewRequestBody().
+			WithRequired(true).
+			WithJSONSchemaRef(&openapi3.SchemaRef{
+				Ref: "#/components/schemas/CreateCampaignRequest",
+			}),
+	}
+	createOp.Responses = openapi3.NewResponses()
+	createOp.Responses.Set("201", &openapi3.ResponseRef{
+		Value: openapi3.NewResponse().
+			WithDescription("Resource created successfully").
+			WithJSONSchemaRef(&openapi3.SchemaRef{
+				Ref: "#/components/schemas/Campaign",
+			}),
+	})
+	createOp.Responses.Set("400", errorResponse())
+	createOp.Responses.Set("500", errorResponse())
+
+	// Get Campaign operation
+	getOp := openapi3.NewOperation()
+	getOp.OperationID = "getCampaign"
+	getOp.Summary = "Get a specific Campaign resource"
+	getOp.Description = "Returns details of a specific Campaign resource by UID"
+	getOp.Tags = []string{"Campaign"}
+	getOp.Responses = openapi3.NewResponses()
+	getOp.Responses.Set("200", &openapi3.ResponseRef{
+		Value: openapi3.NewResponse().
+			WithDescription("Successful response").
+			WithJSONSchemaRef(&openapi3.SchemaRef{
+				Ref: "#/components/schemas/Campaign",
+			}),
+	})
+	getOp.Responses.Set("404", errorResponse())
+	getOp.Responses.Set("500", errorResponse())
+
+	// Update Campaign operation
+	updateOp := openapi3.NewOperation()
+	updateOp.OperationID = "updateCampaign"
+	updateOp.Summary = "Update a Campaign resource"
+	updateOp.Description = "Updates an existing Campaign resource with new values"
+	updateOp.Tags = []string{"Campaign"}
+	updateOp.RequestBody = &openapi3.RequestBodyRef{
+		Value: openapi3.NewRequestBody().
+			WithRequired(true).
+			WithJSONSchemaRef(&openapi3.SchemaRef{
+				Ref: "#/components/schemas/UpdateCampaignRequest",
+			}),
+	}
+	updateOp.Responses = openapi3.NewResponses()
+	updateOp.Responses.Set("200", &openapi3.ResponseRef{
+		Value: openapi3.NewResponse().
+			WithDescription("Resource updated successfully").
+			WithJSONSchemaRef(&openapi3.SchemaRef{
+				Ref: "#/components/schemas/Campaign",
+			}),
+	})
+	updateOp.Responses.Set("400", errorResponse())
+	updateOp.Responses.Set("404", errorResponse())
+	updateOp.Responses.Set("500", errorResponse())
+
+	// Delete Campaign operation
+	deleteOp := openapi3.NewOperation()
+	deleteOp.OperationID = "deleteCampaign"
+	deleteOp.Summary = "Delete a Campaign resource"
+	deleteOp.Description = "Removes a Campaign resource from the inventory"
+	deleteOp.Tags = []string{"Campaign"}
+	deleteOp.Responses = openapi3.NewResponses()
+	deleteOp.Responses.Set("200", &openapi3.ResponseRef{
+		Value: openapi3.NewResponse().
+			WithDescription("Resource deleted successfully").
+			WithJSONSchemaRef(&openapi3.SchemaRef{
+				Ref: "#/components/schemas/DeleteResponse",
+			}),
+	})
+	deleteOp.Responses.Set("400", errorResponse())
+	deleteOp.Responses.Set("404", errorResponse())
+	deleteOp.Responses.Set("500", errorResponse())
+
+	// Create path items
+	collectionPath := &openapi3.PathItem{
+		Get:  listOp,
+		Post: createOp,
+	}
+
+	uidParam := openapi3.NewPathParameter("uid").
+		WithDescription("Unique identifier of the Campaign resource").
+		WithRequired(true).
+		WithSchema(openapi3.NewStringSchema())
+
+	itemPath := &openapi3.PathItem{
+		Get:    getOp,
+		Put:    updateOp,
+		Delete: deleteOp,
+		Parameters: []*openapi3.ParameterRef{
+			{Value: uidParam},
+		},
+	}
+
+	// Add paths to spec
+	spec.Paths.Set("/campaigns", collectionPath)
+	spec.Paths.Set("/campaigns/{uid}", itemPath)
 }
 
 // registerNodePaths registers OpenAPI paths for Node resources
