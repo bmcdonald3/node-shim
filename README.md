@@ -25,3 +25,15 @@ Start the API server:
 ```bash
 go run ./cmd/server/*.go
 ```
+
+### Integration Testing
+Integration tests run against a local mock server to simulate the downstream services.
+
+To execute the test suite:
+
+```bash
+# Run from the project root
+./scripts/integration/test_nodeset.sh
+./scripts/integration/test_binding.sh
+./scripts/integration/test_campaign.sh
+```
