@@ -54,39 +54,39 @@ import (
 
 // GetNodes returns all Node resources
 func GetNodes(w http.ResponseWriter, r *http.Request) {
-	// Authorization: Add custom middleware in routes.go or implement checks here
-	// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
+// Authorization: Add custom middleware in routes.go or implement checks here
+// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
 
-	nodes, err := storage.LoadAllNodes(r.Context())
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Errorf("failed to load nodes: %w", err))
-		return
-	}
-	respondJSON(w, http.StatusOK, nodes)
+nodes, err := storage.ListNodes(r.Context())
+if err != nil {
+respondError(w, http.StatusInternalServerError, fmt.Errorf("failed to load nodes: %w", err))
+return
+}
+respondJSON(w, http.StatusOK, nodes)
 }
 
 // GetNode returns a specific Node resource by UID
 func GetNode(w http.ResponseWriter, r *http.Request) {
-	uid := chi.URLParam(r, "uid")
-	if uid == "" {
-		respondError(w, http.StatusBadRequest, fmt.Errorf("Node UID is required"))
-		return
-	}
+uid := chi.URLParam(r, "uid")
+if uid == "" {
+respondError(w, http.StatusBadRequest, fmt.Errorf("Node UID is required"))
+return
+}
 
-	// Version context available here for version-aware operations
-	// versionCtx := versioning.GetVersionContext(r.Context())
-	// Requested version: versionCtx.ServeVersion
-	// To enable: replace storage.LoadNode() with version-aware function
+// Version context available here for version-aware operations
+// versionCtx := versioning.GetVersionContext(r.Context())
+// Requested version: versionCtx.ServeVersion
+// To enable: replace storage.LoadNode() with version-aware function
 
-	// Authorization: Add custom middleware in routes.go or implement checks here
-	// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
+// Authorization: Add custom middleware in routes.go or implement checks here
+// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
 
-	node, err := storage.LoadNode(r.Context(), uid)
-	if err != nil {
-		respondError(w, http.StatusNotFound, fmt.Errorf("Node not found: %w", err))
-		return
-	}
-	respondJSON(w, http.StatusOK, node)
+node, err := storage.GetNode(r.Context(), uid)
+if err != nil {
+respondError(w, http.StatusNotFound, fmt.Errorf("Node not found: %w", err))
+return
+}
+respondJSON(w, http.StatusOK, node)
 }
 
 // CreateNode creates a new Node resource

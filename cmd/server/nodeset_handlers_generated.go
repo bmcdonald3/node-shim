@@ -54,11 +54,11 @@ import (
 
 // GetNodeSets returns all NodeSet resources
 func GetNodeSets(w http.ResponseWriter, r *http.Request) {
-	// Authorization: Add custom middleware in routes.go or implement checks here
-	// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
+// Authorization: Add custom middleware in routes.go or implement checks here
+// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
 
-	nodesets, err := storage.LoadAllNodeSets(r.Context())
-	if err != nil {
+nodesets, err := storage.ListNodeSets(r.Context())
+if err != nil {
 		respondError(w, http.StatusInternalServerError, fmt.Errorf("failed to load nodesets: %w", err))
 		return
 	}
@@ -78,11 +78,11 @@ func GetNodeSet(w http.ResponseWriter, r *http.Request) {
 	// Requested version: versionCtx.ServeVersion
 	// To enable: replace storage.LoadNodeSet() with version-aware function
 
-	// Authorization: Add custom middleware in routes.go or implement checks here
-	// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
+// Authorization: Add custom middleware in routes.go or implement checks here
+// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
 
-	nodeSet, err := storage.LoadNodeSet(r.Context(), uid)
-	if err != nil {
+nodeSet, err := storage.GetNodeSet(r.Context(), uid)
+if err != nil {
 		respondError(w, http.StatusNotFound, fmt.Errorf("NodeSet not found: %w", err))
 		return
 	}
