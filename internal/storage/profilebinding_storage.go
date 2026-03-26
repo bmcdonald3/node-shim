@@ -23,7 +23,7 @@ metadataClient = client.NewMetadataClient(metadataURL)
 
 bootURL := os.Getenv("BOOT_URL")
 if bootURL == "" {
-bootURL = "http://localhost:8082"
+bootURL = "http://localhost:8081"
 }
 bootClient = client.NewBootClient(bootURL)
 }
@@ -35,12 +35,16 @@ var xnames []string
 switch pb.Spec.TargetRef.Kind {
 case "Node":
 // For a single node, we need to find its xname.
-// Since LoadNode uses UID, we need to load it first.
+// In the case of campaigns, Name is already an xname.
+// We try to load a Node resource by UID/Name first, but if it fails,
+// we assume the target Name is the xname itself.
 node, err := LoadNode(ctx, pb.Spec.TargetRef.Name)
-if err != nil {
-return fmt.Errorf("failed to load target node: %w", err)
-}
+if err == nil {
 xnames = append(xnames, node.Spec.XName)
+} else {
+// Tentatively assume Name is already an xname
+xnames = append(xnames, pb.Spec.TargetRef.Name)
+}
 case "NodeSet":
 ns, err := GetNodeSet(ctx, pb.Spec.TargetRef.Name)
 if err != nil {

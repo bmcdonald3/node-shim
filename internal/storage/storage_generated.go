@@ -63,6 +63,173 @@ func ensureBackend() {
 	}
 }
 
+// Campaign storage operations
+
+// LoadAllCampaigns retrieves all Campaign resources.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeouts
+//
+// Returns:
+//   - []*v1.Campaign: Slice of Campaign resources
+//   - error: Any error that occurred during loading
+func LoadAllCampaigns(ctx context.Context) ([]*v1.Campaign, error) {
+	ensureBackend()
+
+	rawData, err := Backend.LoadAll(ctx, "Campaign")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load all campaigns: %w", err)
+	}
+
+	campaigns := make([]*v1.Campaign, 0, len(rawData))
+	for _, raw := range rawData {
+		campaign := &v1.Campaign{}
+		if err := json.Unmarshal(raw, campaign); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal Campaign: %w", err)
+		}
+		campaigns = append(campaigns, campaign)
+	}
+
+	return campaigns, nil
+}
+
+// LoadCampaign retrieves a single Campaign resource by UID.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeouts
+//   - uid: Unique identifier of the Campaign resource
+//
+// Returns:
+//   - *v1.Campaign: The Campaign resource
+//   - error: fabricaStorage.ErrNotFound if resource doesn't exist, other errors for failures
+func LoadCampaign(ctx context.Context, uid string) (*v1.Campaign, error) {
+	ensureBackend()
+
+	rawData, err := Backend.Load(ctx, "Campaign", uid)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load Campaign %s: %w", uid, err)
+	}
+
+	campaign := &v1.Campaign{}
+	if err := json.Unmarshal(rawData, campaign); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal Campaign: %w", err)
+	}
+
+	return campaign, nil
+}
+
+// SaveCampaign stores a Campaign resource.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeouts
+//   - campaign: The Campaign resource to save
+//
+// Returns:
+//   - error: Any error that occurred during saving
+func SaveCampaign(ctx context.Context, campaign *v1.Campaign) error {
+	ensureBackend()
+
+	data, err := json.Marshal(campaign)
+	if err != nil {
+		return fmt.Errorf("failed to marshal Campaign: %w", err)
+	}
+
+	if err := Backend.Save(ctx, "Campaign", campaign.Metadata.UID, data); err != nil {
+		return fmt.Errorf("failed to save Campaign: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateCampaign updates an existing Campaign resource.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeouts
+//   - campaign: The Campaign resource to update
+//
+// Returns:
+//   - error: fabricaStorage.ErrNotFound if resource doesn't exist, other errors for failures
+func UpdateCampaign(ctx context.Context, campaign *v1.Campaign) error {
+	ensureBackend()
+
+	// Check if resource exists first
+	exists, err := Backend.Exists(ctx, "Campaign", campaign.Metadata.UID)
+	if err != nil {
+		return fmt.Errorf("failed to check Campaign existence: %w", err)
+	}
+	if !exists {
+		return fabricaStorage.ErrNotFound
+	}
+
+	data, err := json.Marshal(campaign)
+	if err != nil {
+		return fmt.Errorf("failed to marshal Campaign: %w", err)
+	}
+
+	if err := Backend.Save(ctx, "Campaign", campaign.Metadata.UID, data); err != nil {
+		return fmt.Errorf("failed to update Campaign: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteCampaign removes a Campaign resource by UID.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeouts
+//   - uid: Unique identifier of the Campaign resource
+//
+// Returns:
+//   - error: fabricaStorage.ErrNotFound if resource doesn't exist, other errors for failures
+func DeleteCampaign(ctx context.Context, uid string) error {
+	ensureBackend()
+
+	if err := Backend.Delete(ctx, "Campaign", uid); err != nil {
+		return fmt.Errorf("failed to delete Campaign %s: %w", uid, err)
+	}
+
+	return nil
+}
+
+// ExistsCampaign checks if a Campaign resource exists.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeouts
+//   - uid: Unique identifier of the Campaign resource
+//
+// Returns:
+//   - bool: true if the resource exists
+//   - error: Any error that occurred during the check
+func ExistsCampaign(ctx context.Context, uid string) (bool, error) {
+	ensureBackend()
+
+	exists, err := Backend.Exists(ctx, "Campaign", uid)
+	if err != nil {
+		return false, fmt.Errorf("failed to check Campaign existence: %w", err)
+	}
+
+	return exists, nil
+}
+
+// ListCampaignUIDs returns UIDs of all Campaign resources.
+//
+// Parameters:
+//   - ctx: Context for cancellation and timeouts
+//
+// Returns:
+//   - []string: Array of Campaign resource UIDs
+//   - error: Any error that occurred during listing
+func ListCampaignUIDs(ctx context.Context) ([]string, error) {
+	ensureBackend()
+
+	uids, err := Backend.List(ctx, "Campaign")
+	if err != nil {
+		return nil, fmt.Errorf("failed to list Campaign UIDs: %w", err)
+	}
+
+	return uids, nil
+}
+
 // Node storage operations
 
 // LoadAllNodes retrieves all Node resources.
@@ -270,19 +437,19 @@ func LoadAllNodeSets(ctx context.Context) ([]*v1.NodeSet, error) {
 //   - *v1.NodeSet: The NodeSet resource
 //   - error: fabricaStorage.ErrNotFound if resource doesn't exist, other errors for failures
 func LoadNodeSet(ctx context.Context, uid string) (*v1.NodeSet, error) {
-ensureBackend()
+	ensureBackend()
 
-rawData, err := Backend.Load(ctx, "NodeSet", uid)
-if err != nil {
-return nil, err
-}
+	rawData, err := Backend.Load(ctx, "NodeSet", uid)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load NodeSet %s: %w", uid, err)
+	}
 
-nodeSet := &v1.NodeSet{}
-if err := json.Unmarshal(rawData, nodeSet); err != nil {
-return nil, fmt.Errorf("failed to unmarshal NodeSet: %w", err)
-}
+	nodeSet := &v1.NodeSet{}
+	if err := json.Unmarshal(rawData, nodeSet); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal NodeSet: %w", err)
+	}
 
-return nodeSet, nil
+	return nodeSet, nil
 }
 
 // SaveNodeSet stores a NodeSet resource.
@@ -607,6 +774,12 @@ func (c *StorageClient) Get(ctx context.Context, kind, uid string) (interface{},
 
 	// Unmarshal based on kind
 	switch kind {
+	case "Campaign":
+		var resource v1.Campaign
+		if err := json.Unmarshal(rawData, &resource); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal Campaign: %w", err)
+		}
+		return &resource, nil
 	case "Node":
 		var resource v1.Node
 		if err := json.Unmarshal(rawData, &resource); err != nil {
@@ -647,6 +820,16 @@ func (c *StorageClient) List(ctx context.Context, kind string) ([]interface{}, e
 
 	// Unmarshal based on kind
 	switch kind {
+	case "Campaign":
+		result := make([]interface{}, 0, len(rawData))
+		for _, raw := range rawData {
+			var resource v1.Campaign
+			if err := json.Unmarshal(raw, &resource); err != nil {
+				return nil, fmt.Errorf("failed to unmarshal Campaign: %w", err)
+			}
+			result = append(result, &resource)
+		}
+		return result, nil
 	case "Node":
 		result := make([]interface{}, 0, len(rawData))
 		for _, raw := range rawData {
@@ -698,6 +881,8 @@ func (c *StorageClient) Update(ctx context.Context, resource interface{}) error 
 
 	// Extract kind and UID based on type
 	switch res := resource.(type) {
+	case *v1.Campaign:
+		return c.backend.Save(ctx, "Campaign", res.Metadata.UID, data)
 	case *v1.Node:
 		return c.backend.Save(ctx, "Node", res.Metadata.UID, data)
 	case *v1.NodeSet:
