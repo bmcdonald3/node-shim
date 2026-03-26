@@ -37,14 +37,36 @@ return nil
 }
 
 // GetNodeSet retrieves a NodeSet and resolves it
-func GetNodeSet(ctx context.Context, uid string) (*v1.NodeSet, error) {
-ns, err := LoadNodeSet(ctx, uid)
+func GetNodeSet(ctx context.Context, uidOrName string) (*v1.NodeSet, error) {
+// 1. Get the base nodeset from local storage (FileBackend).
+// Try searching by UID first.
+ns, err := LoadNodeSet(ctx, uidOrName)
 if err != nil {
-return nil, err
+// Try searching by name if UID lookup failed.
+nss, loadErr := LoadAllNodeSets(ctx)
+if loadErr != nil {
+return nil, fmt.Errorf("failed to list all nodesets: %w", loadErr)
+}
+for _, item := range nss {
+if item.Metadata.Name == uidOrName {
+ns = item
+err = nil
+break
+}
+}
 }
 
+if err != nil {
+return nil, fmt.Errorf("nodeset not found: %w", err)
+}
+
+if ns == nil {
+return nil, fmt.Errorf("nodeset not found: %s", uidOrName)
+}
+
+// 2. Resolve the dynamic status from SMD in-memory
 if err := ResolveNodeSet(ctx, ns); err != nil {
-return nil, err
+return nil, fmt.Errorf("failed to resolve nodeset from SMD: %w", err)
 }
 
 return ns, nil
@@ -52,16 +74,18 @@ return ns, nil
 
 // ListNodeSets retrieves all NodeSets and resolves them
 func ListNodeSets(ctx context.Context) ([]*v1.NodeSet, error) {
-nss, err := LoadAllNodeSets(ctx)
-if err != nil {
-return nil, err
-}
+	// Original Fabrica logic: Read all from local file storage first
+	nss, err := LoadAllNodeSets(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-for _, ns := range nss {
-if err := ResolveNodeSet(ctx, ns); err != nil {
-return nil, err
-}
-}
+	// Dynamic logic: Augment each loaded object with state from SMD
+	for _, ns := range nss {
+		if err := ResolveNodeSet(ctx, ns); err != nil {
+			return nil, err
+		}
+	}
 
-return nss, nil
+	return nss, nil
 }

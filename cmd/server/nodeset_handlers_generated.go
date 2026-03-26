@@ -54,48 +54,52 @@ import (
 
 // GetNodeSets returns all NodeSet resources
 func GetNodeSets(w http.ResponseWriter, r *http.Request) {
-	// Authorization: Add custom middleware in routes.go or implement checks here
-	// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
+// Authorization: Add custom middleware in routes.go or implement checks here
+// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
 
-	nodesets, err := storage.LoadAllNodeSets(r.Context())
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, fmt.Errorf("failed to load nodesets: %w", err))
-		return
-	}
-	respondJSON(w, http.StatusOK, nodesets)
+nodesets, err := storage.ListNodeSets(r.Context())
+if err != nil {
+respondError(w, http.StatusInternalServerError, fmt.Errorf("failed to load nodesets: %w", err))
+return
+}
+respondJSON(w, http.StatusOK, nodesets)
 }
 
 // GetNodeSet returns a specific NodeSet resource by UID
 func GetNodeSet(w http.ResponseWriter, r *http.Request) {
-	uid := chi.URLParam(r, "uid")
-	if uid == "" {
-		respondError(w, http.StatusBadRequest, fmt.Errorf("NodeSet UID is required"))
-		return
-	}
+uid := chi.URLParam(r, "uid")
+if uid == "" {
+respondError(w, http.StatusBadRequest, fmt.Errorf("NodeSet UID is required"))
+return
+}
 
-	// Version context available here for version-aware operations
-	// versionCtx := versioning.GetVersionContext(r.Context())
-	// Requested version: versionCtx.ServeVersion
-	// To enable: replace storage.LoadNodeSet() with version-aware function
+// Version context available here for version-aware operations
+// versionCtx := versioning.GetVersionContext(r.Context())
+// Requested version: versionCtx.ServeVersion
+// To enable: replace storage.LoadNodeSet() with version-aware function
 
-	// Authorization: Add custom middleware in routes.go or implement checks here
-	// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
+// Authorization: Add custom middleware in routes.go or implement checks here
+// Example: if !authorized(r) { respondError(w, http.StatusUnauthorized, fmt.Errorf("unauthorized")); return }
 
-	nodeSet, err := storage.LoadNodeSet(r.Context(), uid)
-	if err != nil {
-		respondError(w, http.StatusNotFound, fmt.Errorf("NodeSet not found: %w", err))
-		return
-	}
-	respondJSON(w, http.StatusOK, nodeSet)
+nodeSet, err := storage.GetNodeSet(r.Context(), uid)
+if err != nil {
+respondError(w, http.StatusNotFound, fmt.Errorf("NodeSet not found: %w", err))
+return
+}
+respondJSON(w, http.StatusOK, nodeSet)
 }
 
 // CreateNodeSet creates a new NodeSet resource
 func CreateNodeSet(w http.ResponseWriter, r *http.Request) {
-	var req CreateNodeSetRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
-		return
-	}
+var req CreateNodeSetRequest
+if r.Body == nil {
+respondError(w, http.StatusBadRequest, fmt.Errorf("request body is empty"))
+return
+}
+if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+respondError(w, http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+return
+}
 
 	// Layer 1: Request validation (validates inline spec fields and metadata)
 	if err := validation.ValidateResource(&req); err != nil {

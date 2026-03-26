@@ -270,19 +270,19 @@ func LoadAllNodeSets(ctx context.Context) ([]*v1.NodeSet, error) {
 //   - *v1.NodeSet: The NodeSet resource
 //   - error: fabricaStorage.ErrNotFound if resource doesn't exist, other errors for failures
 func LoadNodeSet(ctx context.Context, uid string) (*v1.NodeSet, error) {
-	ensureBackend()
+ensureBackend()
 
-	rawData, err := Backend.Load(ctx, "NodeSet", uid)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load NodeSet %s: %w", uid, err)
-	}
+rawData, err := Backend.Load(ctx, "NodeSet", uid)
+if err != nil {
+return nil, err
+}
 
-	nodeSet := &v1.NodeSet{}
-	if err := json.Unmarshal(rawData, nodeSet); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal NodeSet: %w", err)
-	}
+nodeSet := &v1.NodeSet{}
+if err := json.Unmarshal(rawData, nodeSet); err != nil {
+return nil, fmt.Errorf("failed to unmarshal NodeSet: %w", err)
+}
 
-	return nodeSet, nil
+return nodeSet, nil
 }
 
 // SaveNodeSet stores a NodeSet resource.
