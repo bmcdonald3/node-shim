@@ -38,6 +38,22 @@ import (
 	"github.com/user/node-service/apis/example.fabrica.dev/v1"
 )
 
+// CreateCampaignRequest represents a request to create a Campaign
+type CreateCampaignRequest struct {
+	Metadata    fabrica.Metadata  `json:"metadata" validate:"required"`
+	Spec        v1.CampaignSpec   `json:"spec" validate:"required"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+// UpdateCampaignRequest represents a request to update a Campaign
+type UpdateCampaignRequest struct {
+	Metadata    fabrica.Metadata  `json:"metadata,omitempty"`
+	Spec        v1.CampaignSpec   `json:"spec,omitempty" validate:"omitempty"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
 // CreateNodeRequest represents a request to create a Node
 type CreateNodeRequest struct {
 	Metadata    fabrica.Metadata  `json:"metadata" validate:"required"`

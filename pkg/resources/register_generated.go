@@ -11,6 +11,9 @@ import (
 // RegisterAllResources registers all discovered resources with the generator.
 // This file is auto-generated. Re-run 'fabrica generate' after adding resources.
 func RegisterAllResources(gen *codegen.Generator) error {
+	if err := gen.RegisterResource(&v1.Campaign{}); err != nil {
+		return fmt.Errorf("failed to register Campaign: %w", err)
+	}
 	if err := gen.RegisterResource(&v1.Node{}); err != nil {
 		return fmt.Errorf("failed to register Node: %w", err)
 	}

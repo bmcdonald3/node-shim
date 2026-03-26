@@ -210,6 +210,93 @@ func (c *Client) doPatchRequest(ctx context.Context, endpoint string, patchData 
 	return nil
 }
 
+// GetCampaigns retrieves all campaigns
+func (c *Client) GetCampaigns(ctx context.Context) ([]v1.Campaign, error) {
+	var response []v1.Campaign
+	if err := c.doRequest(ctx, "GET", "/campaigns", nil, &response); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+// GetCampaign retrieves a specific Campaign by UID
+func (c *Client) GetCampaign(ctx context.Context, uid string) (*v1.Campaign, error) {
+	var result v1.Campaign
+	endpoint := fmt.Sprintf("/campaigns/%s", uid)
+	if err := c.doRequest(ctx, "GET", endpoint, nil, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// CreateCampaign creates a new Campaign
+func (c *Client) CreateCampaign(ctx context.Context, req CreateCampaignRequest) (*v1.Campaign, error) {
+	var result v1.Campaign
+	if err := c.doRequest(ctx, "POST", "/campaigns", req, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// UpdateCampaign updates an existing Campaign
+func (c *Client) UpdateCampaign(ctx context.Context, uid string, req UpdateCampaignRequest) (*v1.Campaign, error) {
+	var result v1.Campaign
+	endpoint := fmt.Sprintf("/campaigns/%s", uid)
+	if err := c.doRequest(ctx, "PUT", endpoint, req, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// PatchCampaign patches an existing Campaign spec with the specified patch data and content type
+func (c *Client) PatchCampaign(ctx context.Context, uid string, patchData []byte, contentType string) (*v1.Campaign, error) {
+	var result v1.Campaign
+	endpoint := fmt.Sprintf("/campaigns/%s", uid)
+	if err := c.doPatchRequest(ctx, endpoint, patchData, contentType, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// UpdateCampaignStatus updates only the status of an existing Campaign
+// This method is intended for controllers, reconcilers, and monitoring systems.
+// It preserves the spec and only updates the status portion of the resource.
+func (c *Client) UpdateCampaignStatus(ctx context.Context, uid string, status v1.CampaignStatus) (*v1.Campaign, error) {
+	var result v1.Campaign
+	endpoint := fmt.Sprintf("/campaigns/%s/status", uid)
+	if err := c.doRequest(ctx, "PUT", endpoint, status, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// PatchCampaignStatus patches only the status of an existing Campaign
+// Supports JSON Merge Patch by default. Use PatchCampaignStatusWithType for other patch formats.
+func (c *Client) PatchCampaignStatus(ctx context.Context, uid string, patchData []byte) (*v1.Campaign, error) {
+	return c.PatchCampaignStatusWithType(ctx, uid, patchData, "application/merge-patch+json")
+}
+
+// PatchCampaignStatusWithType patches status with a specific patch content type
+// Supported types: application/merge-patch+json, application/json-patch+json, application/fabrica-patch+json
+func (c *Client) PatchCampaignStatusWithType(ctx context.Context, uid string, patchData []byte, contentType string) (*v1.Campaign, error) {
+	var result v1.Campaign
+	endpoint := fmt.Sprintf("/campaigns/%s/status", uid)
+	if err := c.doPatchRequest(ctx, endpoint, patchData, contentType, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// DeleteCampaign deletes a Campaign by UID
+func (c *Client) DeleteCampaign(ctx context.Context, uid string) error {
+	endpoint := fmt.Sprintf("/campaigns/%s", uid)
+	var response DeleteResponse
+	if err := c.doRequest(ctx, "DELETE", endpoint, nil, &response); err != nil {
+		return err
+	}
+	return nil
+}
+
 // GetNodes retrieves all nodes
 func (c *Client) GetNodes(ctx context.Context) ([]v1.Node, error) {
 	var response []v1.Node
