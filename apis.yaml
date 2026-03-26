@@ -7,3 +7,4 @@ groups:
         - Node
         - NodeSet
         - ProfileBinding
+        - Campaign
