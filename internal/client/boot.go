@@ -13,6 +13,9 @@ HTTPClient *http.Client
 }
 
 func NewBootClient(baseURL string) *BootClient {
+if baseURL == "" {
+baseURL = "http://boot-service:8080"
+}
 return &BootClient{
 BaseURL: baseURL,
 HTTPClient: &http.Client{

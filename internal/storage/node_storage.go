@@ -13,9 +13,6 @@ var smdClient *client.SMDClient
 
 func init() {
 smdURL := os.Getenv("SMD_URL")
-if smdURL == "" {
-smdURL = "http://localhost:2379" // Default fallback
-}
 smdClient = client.NewSMDClient(smdURL)
 }
 

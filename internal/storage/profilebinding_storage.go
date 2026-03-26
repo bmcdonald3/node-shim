@@ -15,16 +15,10 @@ bootClient     *client.BootClient
 )
 
 func init() {
-metadataURL := os.Getenv("METADATA_URL")
-if metadataURL == "" {
-metadataURL = "http://localhost:8081"
-}
+metadataURL := os.Getenv("METADATA_SERVICE_URL")
 metadataClient = client.NewMetadataClient(metadataURL)
 
-bootURL := os.Getenv("BOOT_URL")
-if bootURL == "" {
-bootURL = "http://localhost:8081"
-}
+bootURL := os.Getenv("BOOT_SERVICE_URL")
 bootClient = client.NewBootClient(bootURL)
 }
 

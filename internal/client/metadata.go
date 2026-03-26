@@ -13,6 +13,9 @@ HTTPClient *http.Client
 }
 
 func NewMetadataClient(baseURL string) *MetadataClient {
+if baseURL == "" {
+baseURL = "http://metadata-service:8080"
+}
 return &MetadataClient{
 BaseURL: baseURL,
 HTTPClient: &http.Client{

@@ -22,12 +22,15 @@ type SMDClient struct {
 }
 
 func NewSMDClient(baseURL string) *SMDClient {
-	return &SMDClient{
-		BaseURL: baseURL,
-		HTTPClient: &http.Client{
-			Timeout: 10 * time.Second,
-		},
-	}
+if baseURL == "" {
+baseURL = "http://smd:27779"
+}
+return &SMDClient{
+BaseURL: baseURL,
+HTTPClient: &http.Client{
+Timeout: 10 * time.Second,
+},
+}
 }
 
 func (c *SMDClient) ListNodes(ctx context.Context) ([]SMDNode, error) {
