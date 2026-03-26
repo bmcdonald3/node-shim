@@ -14,6 +14,7 @@ require (
 	github.com/openchami/fabrica v0.4.0
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.16.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -54,5 +55,4 @@ require (
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
